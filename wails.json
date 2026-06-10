@@ -1,0 +1,12 @@
+{
+  "name": "to-diag-trace-go",
+  "outputfilename": "to-diag-trace-go",
+  "frontend:install": "pnpm install",
+  "frontend:build": "pnpm run build",
+  "frontend:dev:watcher": "pnpm run dev",
+  "frontend:dev:serverUrl": "auto",
+  "author": {
+    "name": "Max Zakharzhevskiy",
+    "email": "maxzz@msn.com"
+  }
+}
