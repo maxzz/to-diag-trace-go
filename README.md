@@ -60,5 +60,5 @@ build/               # icons, installer assets
 ## Notes
 
 - Requires administrator privileges to write tracing registry keys and Run key entries.
-- PowerShell diagnostics script is embedded from the original tool (`diag/res/PowerShell.ps1`).
+- PowerShell diagnostics script is embedded verbatim from the original C++ `BINARY` resource (`diag/res/PowerShell.ps1`). At runtime it is written to a temp `.ps1` file and invoked via `powershell.exe -File <script> start|stop "<tracePath>" <verbosity>` with the same flags as `PsTraceUtils::Execute`.
 - Single-instance: a second launch activates the existing window.
