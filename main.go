@@ -51,7 +51,7 @@ func main() {
 		if err != nil || !active {
 			return
 		}
-	} else if !diag.IsElevated() {
+	} else if backend.RequireElevationAtLaunchDefault(backend.LoadIniFileOptionsOrDefault()) && !diag.IsElevated() {
 		if err := diag.RelaunchElevated(""); err != nil {
 			println("Error:", err.Error())
 		}

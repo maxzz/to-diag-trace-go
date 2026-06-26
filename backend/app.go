@@ -28,6 +28,7 @@ func (a *App) DomReady(ctx context.Context) {
 	a.restoreWindowOptions(ctx)
 	a.restoreLaunchWindow(ctx)
 	a.emitInitialTraceState(ctx)
+	a.resumePendingAction()
 }
 
 // BeforeClose is called when the application is about to quit,
@@ -55,10 +56,7 @@ func (a *App) ToggleDevTools() {
 }
 
 func (a *App) saveDevToolsState(open bool) {
-	opts, err := LoadIniFileOptions()
-	if err != nil {
-		opts = &IniOptions{}
-	}
+	opts := LoadIniFileOptionsOrDefault()
 	opts.DevTools = open
 	saveIniFileOptions(opts)
 }

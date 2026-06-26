@@ -6,6 +6,10 @@ export function CancelGather() {
   return window['go']['backend']['App']['CancelGather']();
 }
 
+export function GetAppLaunchSettings() {
+  return window['go']['backend']['App']['GetAppLaunchSettings']();
+}
+
 export function GetTraceSettings() {
   return window['go']['backend']['App']['GetTraceSettings']();
 }
@@ -26,12 +30,20 @@ export function RequestElevation() {
   return window['go']['backend']['App']['RequestElevation']();
 }
 
+export function RequestElevationForAction(arg1) {
+  return window['go']['backend']['App']['RequestElevationForAction'](arg1);
+}
+
 export function SetDevToolsState(arg1) {
   return window['go']['backend']['App']['SetDevToolsState'](arg1);
 }
 
 export function SetLaunchMode(arg1) {
   return window['go']['backend']['App']['SetLaunchMode'](arg1);
+}
+
+export function SetRequireElevationAtLaunch(arg1) {
+  return window['go']['backend']['App']['SetRequireElevationAtLaunch'](arg1);
 }
 
 export function StartTracing(arg1) {

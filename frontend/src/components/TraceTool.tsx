@@ -2,11 +2,12 @@ import { useCallback, useEffect, useState } from 'react';
 import { EventsOff, EventsOn } from '../../wailsjs/runtime/runtime';
 import {
     CancelGather,
+    GetAppLaunchSettings,
     GetTraceSettings,
-    IsElevated,
     IsTracingActive,
     PickGatherDestination,
-    RequestElevation,
+    RequestElevationForAction,
+    SetRequireElevationAtLaunch,
     StartTracing,
     StopTracingAndGather,
 } from '../../wailsjs/go/backend/App';
@@ -28,6 +29,8 @@ type GatherDoneEvent = {
     cleanupMessage?: string;
 };
 
+type PendingElevationAction = 'startTracing' | 'gather' | null;
+
 export function TraceTool() {
     const [settings, setSettings] = useState<TraceSettings | null>(null);
     const [isTracing, setIsTracing] = useState(false);
@@ -36,6 +39,9 @@ export function TraceTool() {
     const [enableOtsTrace, setEnableOtsTrace] = useState(false);
     const [verbosity, setVerbosity] = useState(4);
     const [elevated, setElevated] = useState(true);
+    const [requireElevationAtLaunch, setRequireElevationAtLaunch] = useState(true);
+    const [elevationDialogOpen, setElevationDialogOpen] = useState(false);
+    const [pendingElevationAction, setPendingElevationAction] = useState<PendingElevationAction>(null);
     const [gathering, setGathering] = useState(false);
     const [progress, setProgress] = useState({ collected: 0, total: 0 });
     const [failedFiles, setFailedFiles] = useState<string[]>([]);
@@ -46,13 +52,14 @@ export function TraceTool() {
 
     const loadSettings = useCallback(async () => {
         try {
-            const s = await GetTraceSettings();
+            const [s, launch] = await Promise.all([GetTraceSettings(), GetAppLaunchSettings()]);
             setSettings(s);
             setIsTracing(s.isTracing);
             setAccumulateTraces(s.accumulateTraces);
             setEnableOtsTrace(s.enableOtsTrace);
             setVerbosity(s.verbosity || 4);
-            setElevated(await IsElevated());
+            setElevated(launch.isElevated);
+            setRequireElevationAtLaunch(launch.requireElevationAtLaunch);
         } catch (e) {
             setError(String(e));
         }
@@ -88,13 +95,16 @@ export function TraceTool() {
         };
     }, [loadSettings]);
 
-    async function handlePrimaryAction() {
-        setError(null);
-        if (!elevated) {
-            await RequestElevation();
-            return;
+    async function handleRequireElevationChange(checked: boolean) {
+        try {
+            await SetRequireElevationAtLaunch(checked);
+            setRequireElevationAtLaunch(checked);
+        } catch (e) {
+            setError(String(e));
         }
+    }
 
+    async function runPrivilegedAction() {
         if (isTracing) {
             setBusy(true);
             setGathering(true);
@@ -134,6 +144,55 @@ export function TraceTool() {
         }
     }
 
+    async function handlePrimaryAction() {
+        setError(null);
+        if (!elevated) {
+            setPendingElevationAction(isTracing ? 'gather' : 'startTracing');
+            setElevationDialogOpen(true);
+            return;
+        }
+
+        await runPrivilegedAction();
+    }
+
+    async function confirmElevation() {
+        const action = pendingElevationAction;
+        setElevationDialogOpen(false);
+        setPendingElevationAction(null);
+        if (!action) {
+            return;
+        }
+
+        try {
+            if (action === 'startTracing') {
+                await RequestElevationForAction({
+                    type: 'startTracing',
+                    startOpts: {
+                        accumulateTraces,
+                        enableOtsTrace: enableOtsTrace && (settings?.passwordManagerFound ?? false),
+                        verbosity,
+                    },
+                });
+            } else {
+                setBusy(true);
+                setGathering(true);
+                setGatherDone(false);
+                setFailedFiles([]);
+                setProgress({ collected: 0, total: 0 });
+                await RequestElevationForAction({ type: 'gather' });
+            }
+        } catch (e) {
+            setError(String(e));
+            setGathering(false);
+            setBusy(false);
+        }
+    }
+
+    function cancelElevation() {
+        setElevationDialogOpen(false);
+        setPendingElevationAction(null);
+    }
+
     function handleCancelGather() {
         CancelGather();
         setGathering(false);
@@ -155,10 +214,47 @@ export function TraceTool() {
                 technical support.
             </p>
 
+            <label className="flex items-center gap-2 text-xs">
+                <input
+                    type="checkbox"
+                    checked={requireElevationAtLaunch}
+                    disabled={busy}
+                    onChange={(e) => handleRequireElevationChange(e.target.checked)}
+                />
+                Launch with administrator privileges next time
+            </label>
+
             {!elevated && (
                 <p className="text-xs font-medium text-amber-700">
-                    Administrator privileges are required. Click Start tracing to relaunch elevated.
+                    Running without administrator privileges. Trace operations will prompt for elevation.
                 </p>
+            )}
+
+            {elevationDialogOpen && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+                    <div
+                        role="dialog"
+                        aria-modal="true"
+                        aria-labelledby="elevation-dialog-title"
+                        className="w-full max-w-sm space-y-4 rounded-md border border-blue-200 bg-white p-4 shadow-lg"
+                    >
+                        <h2 id="elevation-dialog-title" className="text-sm font-semibold text-blue-950">
+                            Administrator privileges required
+                        </h2>
+                        <p className="text-xs leading-relaxed text-blue-900">
+                            This operation requires administrator privileges. Relaunch the application elevated
+                            to continue?
+                        </p>
+                        <div className="flex justify-end gap-2">
+                            <Button variant="outline" size="sm" onClick={cancelElevation}>
+                                Cancel
+                            </Button>
+                            <Button size="sm" onClick={confirmElevation}>
+                                Elevate and continue
+                            </Button>
+                        </div>
+                    </div>
+                </div>
             )}
 
             {showMore && (

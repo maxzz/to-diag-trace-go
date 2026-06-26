@@ -128,6 +128,9 @@ func (a *App) StopTracingAndGather(destZip string) error {
 	if err := a.ensureDiag(); err != nil {
 		return err
 	}
+	if !a.diag.IsElevated() {
+		return fmt.Errorf("administrator privileges required")
+	}
 
 	gatherMu.Lock()
 	defer gatherMu.Unlock()
