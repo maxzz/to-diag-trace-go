@@ -1,5 +1,5 @@
 # Application privilege management
-_Exported on 6/25/2026 at 19:11:43 PDT from Cursor (3.9.8)_
+_Exported on 6/25/2026 at 19:18:48 PDT from Cursor (3.9.8)_
 
 ---
 
@@ -65,4 +65,31 @@ When a privileged action is attempted without admin rights (Start tracing / Stop
 - **Privileged ops while in debug mode**: use Start tracing or Gather — confirm elevation in the dialog when prompted.
 
 Note: Windows cannot elevate an existing process in place; elevation always relaunches the app via UAC, then continues the saved operation in the new elevated instance.
+
+---
+
+**User**
+
+Add marker to the UI Frontend page to show application Elevation current status
+
+---
+
+**Cursor**
+
+Adding a header status marker that fetches elevation state so it's always visible on the page.
+
+
+Added an elevation status marker in the page header.
+
+### What was added
+
+- New component: `frontend/src/components/ElevationStatusMarker.tsx`
+- Placed in the header of `App.tsx`, below the title
+
+### Appearance
+
+- **Elevated** — green dot + “Elevated”
+- **Not elevated** — amber dot + “Not elevated”
+
+The badge uses a pill style on the blue header bar and includes a tooltip with the full explanation on hover. It loads status from `GetAppLaunchSettings()` on mount.
 
