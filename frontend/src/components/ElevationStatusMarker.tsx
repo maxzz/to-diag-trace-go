@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react';
-import { GetAppLaunchSettings } from '../../wailsjs/go/backend/App';
+import { getAppLaunchSettings } from '@/wails/trace-backend';
 
 export function ElevationStatusMarker() {
     const [elevated, setElevated] = useState<boolean | null>(null);
 
     useEffect(() => {
-        GetAppLaunchSettings()
+        getAppLaunchSettings()
             .then((settings) => setElevated(settings.isElevated))
             .catch(() => setElevated(false));
     }, []);

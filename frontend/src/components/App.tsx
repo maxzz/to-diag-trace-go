@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { ToggleDevTools } from '../../wailsjs/go/backend/App';
+import { toggleDevTools } from '@/wails/trace-backend';
 import { ElevationStatusMarker } from './ElevationStatusMarker';
 import { TraceTool } from './TraceTool';
 
@@ -10,7 +10,7 @@ export function App() {
             function handleKeyDown(e: KeyboardEvent) {
                 const isDevToolsShortcut = (e.ctrlKey && e.shiftKey && e.code === 'F12') || (e.ctrlKey && e.shiftKey && e.code === 'KeyI');
                 if (isDevToolsShortcut) {
-                    ToggleDevTools().catch(console.error);
+                    toggleDevTools().catch(console.error);
                 }
             }
             

@@ -1,17 +1,16 @@
 import { useCallback, useEffect, useState } from 'react';
 import { EventsOff, EventsOn } from '../../wailsjs/runtime/runtime';
 import {
-    CancelGather,
-    GetAppLaunchSettings,
-    GetTraceSettings,
-    IsTracingActive,
-    PickGatherDestination,
-    RequestElevationForAction,
-    SetRequireElevationAtLaunch,
-    StartTracing,
-    StopTracingAndGather,
-} from '../../wailsjs/go/backend/App';
-import { backend } from '../../wailsjs/go/models';
+    cancelGather,
+    getAppLaunchSettings,
+    getTraceSettings,
+    isTracingActive,
+    pickGatherDestination,
+    requestElevationForAction,
+    setRequireElevationAtLaunch,
+    startTracing,
+    stopTracingAndGather,
+} from '@/wails/trace-backend';
 import { Button } from '@/ui/shadcn/button';
 
 type TraceSettings = {
@@ -53,7 +52,7 @@ export function TraceTool() {
 
     const loadSettings = useCallback(async () => {
         try {
-            const [s, launch] = await Promise.all([GetTraceSettings(), GetAppLaunchSettings()]);
+            const [s, launch] = await Promise.all([getTraceSettings(), getAppLaunchSettings()]);
             setSettings(s);
             setIsTracing(s.isTracing);
             setAccumulateTraces(s.accumulateTraces);
@@ -98,7 +97,7 @@ export function TraceTool() {
 
     async function handleRequireElevationChange(checked: boolean) {
         try {
-            await SetRequireElevationAtLaunch(checked);
+            await setRequireElevationAtLaunch(checked);
             setRequireElevationAtLaunch(checked);
         } catch (e) {
             setError(String(e));
@@ -113,15 +112,15 @@ export function TraceTool() {
             setFailedFiles([]);
             setProgress({ collected: 0, total: 0 });
             try {
-                const dest = await PickGatherDestination();
+                const dest = await pickGatherDestination();
                 if (!dest) {
                     setGathering(false);
                     setBusy(false);
-                    const active = await IsTracingActive();
+                    const active = await isTracingActive();
                     setIsTracing(active);
                     return;
                 }
-                await StopTracingAndGather(dest);
+                await stopTracingAndGather(dest);
             } catch (e) {
                 setError(String(e));
                 setGathering(false);
@@ -132,7 +131,7 @@ export function TraceTool() {
 
         setBusy(true);
         try {
-            await StartTracing({
+            await startTracing({
                 accumulateTraces,
                 enableOtsTrace: enableOtsTrace && (settings?.passwordManagerFound ?? false),
                 verbosity,
@@ -166,23 +165,21 @@ export function TraceTool() {
 
         try {
             if (action === 'startTracing') {
-                await RequestElevationForAction(
-                    new backend.PendingAction({
-                        type: 'startTracing',
-                        startOpts: {
-                            accumulateTraces,
-                            enableOtsTrace: enableOtsTrace && (settings?.passwordManagerFound ?? false),
-                            verbosity,
-                        },
-                    }),
-                );
+                await requestElevationForAction({
+                    type: 'startTracing',
+                    startOpts: {
+                        accumulateTraces,
+                        enableOtsTrace: enableOtsTrace && (settings?.passwordManagerFound ?? false),
+                        verbosity,
+                    },
+                });
             } else {
                 setBusy(true);
                 setGathering(true);
                 setGatherDone(false);
                 setFailedFiles([]);
                 setProgress({ collected: 0, total: 0 });
-                await RequestElevationForAction(new backend.PendingAction({ type: 'gather' }));
+                await requestElevationForAction({ type: 'gather' });
             }
         } catch (e) {
             setError(String(e));
@@ -197,7 +194,7 @@ export function TraceTool() {
     }
 
     function handleCancelGather() {
-        CancelGather();
+        cancelGather();
         setGathering(false);
         setBusy(false);
     }
