@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import { ToggleDevTools } from '../../wailsjs/go/backend/App';
+import { ElevationStatusMarker } from './ElevationStatusMarker';
 import { TraceTool } from './TraceTool';
 
 export function App() {
@@ -23,7 +24,10 @@ export function App() {
         <div className="min-h-screen text-sm bg-white grid grid-rows-[auto_1fr_auto]">
 
             <header className="p-3 text-center text-white bg-linear-to-r from-blue-500 to-blue-700 border-b border-blue-900 shadow">
-                DigitalPersona Diagnostic Tool
+                <div className="flex flex-col items-center gap-2">
+                    <span>DigitalPersona Diagnostic Tool</span>
+                    <ElevationStatusMarker />
+                </div>
             </header>
 
             <main className="self-center justify-self-center p-4 w-full flex justify-center">
