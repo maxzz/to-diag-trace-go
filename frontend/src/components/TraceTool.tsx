@@ -11,6 +11,7 @@ import {
     StartTracing,
     StopTracingAndGather,
 } from '../../wailsjs/go/backend/App';
+import { backend } from '../../wailsjs/go/models';
 import { Button } from '@/ui/shadcn/button';
 
 type TraceSettings = {
@@ -165,21 +166,23 @@ export function TraceTool() {
 
         try {
             if (action === 'startTracing') {
-                await RequestElevationForAction({
-                    type: 'startTracing',
-                    startOpts: {
-                        accumulateTraces,
-                        enableOtsTrace: enableOtsTrace && (settings?.passwordManagerFound ?? false),
-                        verbosity,
-                    },
-                });
+                await RequestElevationForAction(
+                    new backend.PendingAction({
+                        type: 'startTracing',
+                        startOpts: {
+                            accumulateTraces,
+                            enableOtsTrace: enableOtsTrace && (settings?.passwordManagerFound ?? false),
+                            verbosity,
+                        },
+                    }),
+                );
             } else {
                 setBusy(true);
                 setGathering(true);
                 setGatherDone(false);
                 setFailedFiles([]);
                 setProgress({ collected: 0, total: 0 });
-                await RequestElevationForAction({ type: 'gather' });
+                await RequestElevationForAction(new backend.PendingAction({ type: 'gather' }));
             }
         } catch (e) {
             setError(String(e));
