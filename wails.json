@@ -1,6 +1,6 @@
 {
-  "name": "to-diag-trace-go",
-  "outputfilename": "to-diag-trace-go",
+  "name": "DpDiagnosticTool",
+  "outputfilename": "DpDiagnosticTool",
   "frontend:install": "pnpm install",
   "frontend:build": "pnpm run build",
   "frontend:dev:watcher": "pnpm run dev",

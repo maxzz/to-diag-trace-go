@@ -16,10 +16,58 @@ type Rectangle struct {
 	Height int `json:"height"`
 }
 
+type PendingAction struct {
+	Type      string             `json:"type"`
+	StartOpts *TraceStartOptions `json:"startOpts,omitempty"`
+}
+
+type AppLaunchSettings struct {
+	RequireElevationAtLaunch bool `json:"requireElevationAtLaunch"`
+	IsElevated               bool `json:"isElevated"`
+}
+
 type IniOptions struct {
-	Bounds   *Rectangle `json:"bounds,omitempty"`
-	DevTools bool       `json:"devTools"`
-	ShowMenu bool       `json:"showMenu"`
+	Bounds                   *Rectangle     `json:"bounds,omitempty"`
+	DevTools                 bool           `json:"devTools"`
+	ShowMenu                 bool           `json:"showMenu"`
+	RequireElevationAtLaunch *bool          `json:"requireElevationAtLaunch,omitempty"`
+	PendingAction            *PendingAction `json:"pendingAction,omitempty"`
+}
+
+func RequireElevationAtLaunchDefault(opts *IniOptions) bool {
+	if opts == nil || opts.RequireElevationAtLaunch == nil {
+		return true
+	}
+	return *opts.RequireElevationAtLaunch
+}
+
+func LoadIniFileOptionsOrDefault() *IniOptions {
+	opts, err := LoadIniFileOptions()
+	if err != nil || opts == nil {
+		return &IniOptions{}
+	}
+	return opts
+}
+
+func mergeIniOptions(base *IniOptions, update *IniOptions) *IniOptions {
+	if update == nil {
+		return base
+	}
+	if base == nil {
+		base = &IniOptions{}
+	}
+	if update.Bounds != nil {
+		base.Bounds = update.Bounds
+	}
+	base.DevTools = update.DevTools
+	base.ShowMenu = update.ShowMenu
+	if update.RequireElevationAtLaunch != nil {
+		base.RequireElevationAtLaunch = update.RequireElevationAtLaunch
+	}
+	if update.PendingAction != nil {
+		base.PendingAction = update.PendingAction
+	}
+	return base
 }
 
 func getIniFilePath() (string, error) {
@@ -104,16 +152,14 @@ func (a *App) saveWindowOptions(ctx context.Context) {
 	devTools := a.platformIsDevToolsOpen()
 	var showMenu bool
 
-	existing, err := LoadIniFileOptions()
-	if err == nil && existing != nil {
-		showMenu = existing.ShowMenu
-	}
+	existing := LoadIniFileOptionsOrDefault()
+	showMenu = existing.ShowMenu
 
-	opts := &IniOptions{
+	opts := mergeIniOptions(existing, &IniOptions{
 		Bounds:   bounds,
 		DevTools: devTools,
 		ShowMenu: showMenu,
-	}
+	})
 
 	saveIniFileOptions(opts)
 }

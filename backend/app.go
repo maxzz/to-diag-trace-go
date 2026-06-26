@@ -2,12 +2,15 @@ package backend
 
 import (
 	"context"
-	"fmt"
+
+	"to-diag-trace-go/diag"
 )
 
 // App struct
 type App struct {
-	ctx context.Context
+	ctx      context.Context
+	diag     *diag.Service
+	autoMode bool
 }
 
 // NewApp creates a new App application struct
@@ -23,6 +26,9 @@ func (a *App) Startup(ctx context.Context) {
 // DomReady is called after front-end resources have been loaded
 func (a *App) DomReady(ctx context.Context) {
 	a.restoreWindowOptions(ctx)
+	a.restoreLaunchWindow(ctx)
+	a.emitInitialTraceState(ctx)
+	a.resumePendingAction()
 }
 
 // BeforeClose is called when the application is about to quit,
@@ -50,18 +56,10 @@ func (a *App) ToggleDevTools() {
 }
 
 func (a *App) saveDevToolsState(open bool) {
-	opts, err := LoadIniFileOptions()
-	if err != nil {
-		opts = &IniOptions{}
-	}
+	opts := LoadIniFileOptionsOrDefault()
 	opts.DevTools = open
 	saveIniFileOptions(opts)
 }
 
 // shutdown is called at application termination
 func (a *App) shutdown(ctx context.Context) {}
-
-// Greet returns a greeting for the given name
-func (a *App) Greet(name string) string {
-	return fmt.Sprintf("Hello %s, It's show time!", name)
-}
