@@ -1,24 +1,64 @@
-## About
+# DigitalPersona Diagnostic Tool (Go)
 
-Wails template which includes: Vite, React, TS, TailwindCSS out of the box.
+Go + Wails rewrite of the legacy C++ **DpDiagnosticTool** — a Windows utility for collecting DigitalPersona diagnostic traces.
 
-Build with `Wails CLI v2.0.0`.
+## Stack
 
-To use this [template](https://wails.io/docs/community/templates):
-```shell
-wails init -n "Your Project Name" -t https://github.com/hotafrika/wails-vite-react-ts-tailwind-template
-cd frontend/src
-npm install
+- **Go / Wails v2** — desktop shell, native dialogs, registry/ETW integration
+- **React + Vite + Tailwind** — UI
+- **`diag/` package** — portable diagnostic logic (Windows-only)
+- **`backend/` package** — Wails bindings and window persistence
+
+## Requirements
+
+- Windows 10/11 x64
+- Go 1.22+
+- [Wails CLI v2.12+](https://wails.io/docs/gettingstarted/installation)
+- pnpm (frontend)
+
+## Development
+
+```powershell
+pnpm install
+pnpm --prefix frontend install
+pnpm run dev
 ```
 
-[Here](scripts) you can find useful scripts for building on different platforms and Wails CLI installation.
+Frontend dev server: http://localhost:3000 (via `wails dev`).
 
-## Live Development
+## Build
 
-To run in live development mode, run `wails dev` in the project directory. In another terminal, go into the `frontend`
-directory and run `npm run dev`. The frontend dev server will run on http://localhost:34115. Connect to this in your
-browser and connect to your application.
+```powershell
+pnpm run build
+# output: build\bin\DpDiagnosticTool.exe
+```
 
-## Building
+## Usage
 
-To build a redistributable, production mode package, use `wails build`.
+1. Launch the app (elevates automatically if needed).
+2. Optionally expand **More** to configure trace options.
+3. Click **Start tracing**, reproduce the issue, then **Stop tracing and Gather trace files**.
+4. Choose a ZIP destination; the archive opens in Explorer when complete.
+
+### Command-line modes
+
+| Switch | Behavior |
+|--------|----------|
+| `/Auto` | Started from Run key; shows UI only if tracing is still active |
+| `/DeleteFiles "path64" "path32"` | Headless boot cleanup of trace folders |
+
+## Project layout
+
+```
+main.go              # entry, embed, CLI routing
+backend/             # Wails app bindings
+diag/                # trace registry, ETW, PowerShell, ZIP gather, scheduler
+frontend/            # React UI (TraceTool in App shell)
+build/               # icons, installer assets
+```
+
+## Notes
+
+- Requires administrator privileges to write tracing registry keys and Run key entries.
+- PowerShell diagnostics script is embedded from the original tool (`diag/res/PowerShell.ps1`).
+- Single-instance: a second launch activates the existing window.
