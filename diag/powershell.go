@@ -130,7 +130,7 @@ func knownFolderSystem32() (string, error) {
 	shGetKnownFolderPath := shell32.NewProc("SHGetKnownFolderPath")
 
 	const kfFlagDefault = 0
-	var pathPtr uintptr
+	var pathPtr *uint16
 	ret, _, err := shGetKnownFolderPath.Call(
 		uintptr(unsafe.Pointer(&folderIDSystem)),
 		uintptr(kfFlagDefault),
@@ -142,7 +142,7 @@ func knownFolderSystem32() (string, error) {
 	}
 	defer windows.CoTaskMemFree(unsafe.Pointer(pathPtr))
 
-	path := windows.UTF16PtrToString((*uint16)(unsafe.Pointer(pathPtr)))
+	path := windows.UTF16PtrToString(pathPtr)
 	if path == "" {
 		return "", fmt.Errorf("SHGetKnownFolderPath returned empty path")
 	}
