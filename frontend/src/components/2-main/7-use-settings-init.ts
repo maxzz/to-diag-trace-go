@@ -15,7 +15,7 @@ import {
     gatheringAtom,
     isTracingAtom,
     progressAtom,
-    requireElevationAtLaunchBaseAtom,
+    loadRequireElevationAtLaunchAtom,
     settingsAtom,
     verbosityAtom,
 } from './a-trace-tool-atoms';
@@ -27,7 +27,7 @@ export function useSettingsInit() {
     const setEnableOtsTrace = useSetAtom(enableOtsTraceAtom);
     const setVerbosity = useSetAtom(verbosityAtom);
     const setElevated = useSetAtom(elevatedAtom);
-    const setRequireElevationAtLaunch = useSetAtom(requireElevationAtLaunchAtom);
+    const setRequireElevationAtLaunch = useSetAtom(loadRequireElevationAtLaunchAtom);
     const setError = useSetAtom(errorAtom);
     const setProgress = useSetAtom(progressAtom);
     const setGathering = useSetAtom(gatheringAtom);

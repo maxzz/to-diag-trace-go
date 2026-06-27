@@ -36,7 +36,9 @@ export const enableOtsTraceAtom = atom(false);
 export const verbosityAtom = atom(4);
 
 export const elevatedAtom = atom(true);
-export const requireElevationAtLaunchBaseAtom = atom(true);
+
+const requireElevationAtLaunchBaseAtom = atom(true);
+
 export const elevationDialogOpenAtom = atom(false);
 export const pendingElevationActionAtom = atom<PendingElevationAction>(null);
 
@@ -57,6 +59,14 @@ export const requireElevationAtLaunchAtom = atom(
         } catch (e) {
             set(errorAtom, String(e));
         }
+    },
+);
+
+/** Sets launch elevation preference from backend load only — does not persist. */
+export const loadRequireElevationAtLaunchAtom = atom(
+    null,
+    (_get, set, checked: boolean) => {
+        set(requireElevationAtLaunchBaseAtom, checked);
     },
 );
 
