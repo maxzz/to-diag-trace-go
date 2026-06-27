@@ -28,7 +28,7 @@ import {
     verbosityAtom,
 } from './a-trace-tool-atoms';
 import { ElevationDialog } from './3-elevation-dialog';
-import { useTraceToolInit } from './1-use-trace-tool-init';
+import { useSettingsInit } from './7-use-settings-init';
 
 export function TraceTool() {
     const settings = useAtomValue(settingsAtom);
@@ -49,7 +49,7 @@ export function TraceTool() {
     const [cleanupMessage, setCleanupMessage] = useAtom(cleanupMessageAtom);
     const [busy, setBusy] = useAtom(busyAtom);
 
-    useTraceToolInit();
+    useSettingsInit();
 
     async function handleRequireElevationChange(checked: boolean) {
         try {

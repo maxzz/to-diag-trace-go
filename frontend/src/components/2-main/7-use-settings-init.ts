@@ -20,7 +20,7 @@ import {
     verbosityAtom,
 } from './a-trace-tool-atoms';
 
-export function useTraceToolInit() {
+export function useSettingsInit() {
     const setSettings = useSetAtom(settingsAtom);
     const setIsTracing = useSetAtom(isTracingAtom);
     const setAccumulateTraces = useSetAtom(accumulateTracesAtom);
