@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect } from 'react';
+import { useAtom } from 'jotai';
 import { EventsOff, EventsOn } from '../../../wailsjs/runtime/runtime';
 import {
     cancelGather,
@@ -7,48 +8,50 @@ import {
     isTracingActive,
     pickGatherDestination,
     requestElevationForAction,
-    setRequireElevationAtLaunch,
+    setRequireElevationAtLaunch as persistRequireElevationAtLaunch,
     startTracing,
     stopTracingAndGather,
 } from '@/wails/trace-backend';
 import { Button } from '@/ui/shadcn/button';
-
-type TraceSettings = {
-    isTracing: boolean;
-    accumulateTraces: boolean;
-    enableOtsTrace: boolean;
-    verbosity: number;
-    tracePath: string;
-    passwordManagerFound: boolean;
-};
-
-type GatherDoneEvent = {
-    zipPath: string;
-    failedFiles: string[];
-    deleteOnReboot?: boolean;
-    cleanupMessage?: string;
-};
-
-type PendingElevationAction = 'startTracing' | 'gather' | null;
+import {
+    accumulateTracesAtom,
+    busyAtom,
+    cleanupMessageAtom,
+    elevatedAtom,
+    elevationDialogOpenAtom,
+    enableOtsTraceAtom,
+    errorAtom,
+    failedFilesAtom,
+    gatherDoneAtom,
+    type GatherDoneEvent,
+    gatheringAtom,
+    isTracingAtom,
+    pendingElevationActionAtom,
+    progressAtom,
+    requireElevationAtLaunchAtom,
+    settingsAtom,
+    showMoreAtom,
+    verbosityAtom,
+} from './a-trace-tool-atoms';
 
 export function TraceTool() {
-    const [settings, setSettings] = useState<TraceSettings | null>(null);
-    const [isTracing, setIsTracing] = useState(false);
-    const [showMore, setShowMore] = useState(false);
-    const [accumulateTraces, setAccumulateTraces] = useState(true);
-    const [enableOtsTrace, setEnableOtsTrace] = useState(false);
-    const [verbosity, setVerbosity] = useState(4);
-    const [elevated, setElevated] = useState(true);
-    const [requireElevationAtLaunch, setRequireElevationAtLaunch] = useState(true);
-    const [elevationDialogOpen, setElevationDialogOpen] = useState(false);
-    const [pendingElevationAction, setPendingElevationAction] = useState<PendingElevationAction>(null);
-    const [gathering, setGathering] = useState(false);
-    const [progress, setProgress] = useState({ collected: 0, total: 0 });
-    const [failedFiles, setFailedFiles] = useState<string[]>([]);
-    const [gatherDone, setGatherDone] = useState(false);
-    const [error, setError] = useState<string | null>(null);
-    const [cleanupMessage, setCleanupMessage] = useState<string | null>(null);
-    const [busy, setBusy] = useState(false);
+    const [settings, setSettings] = useAtom(settingsAtom);
+    const [isTracing, setIsTracing] = useAtom(isTracingAtom);
+    const [showMore, setShowMore] = useAtom(showMoreAtom);
+    const [accumulateTraces, setAccumulateTraces] = useAtom(accumulateTracesAtom);
+    const [enableOtsTrace, setEnableOtsTrace] = useAtom(enableOtsTraceAtom);
+    const [verbosity, setVerbosity] = useAtom(verbosityAtom);
+    const [elevated, setElevated] = useAtom(elevatedAtom);
+    const [requireElevationAtLaunch, setRequireElevationAtLaunch] = useAtom(requireElevationAtLaunchAtom);
+    const [elevationDialogOpen, setElevationDialogOpen] = useAtom(elevationDialogOpenAtom);
+    const [pendingElevationAction, setPendingElevationAction] = useAtom(pendingElevationActionAtom);
+    const [gathering, setGathering] = useAtom(gatheringAtom);
+    const [progress, setProgress] = useAtom(progressAtom);
+    const [failedFiles, setFailedFiles] = useAtom(failedFilesAtom);
+    const [gatherDone, setGatherDone] = useAtom(gatherDoneAtom);
+    const [error, setError] = useAtom(errorAtom);
+    const [cleanupMessage, setCleanupMessage] = useAtom(cleanupMessageAtom);
+    const [busy, setBusy] = useAtom(busyAtom);
 
     const loadSettings = useCallback(
         async () => {
@@ -65,7 +68,17 @@ export function TraceTool() {
                 setError(String(e));
             }
         },
-        []);
+        [
+            setSettings,
+            setIsTracing,
+            setAccumulateTraces,
+            setEnableOtsTrace,
+            setVerbosity,
+            setElevated,
+            setRequireElevationAtLaunch,
+            setError,
+        ],
+    );
 
     useEffect(
         () => {
@@ -97,11 +110,22 @@ export function TraceTool() {
                 EventsOff('trace:gather-error');
             };
         },
-        [loadSettings]);
+        [
+            loadSettings,
+            setIsTracing,
+            setProgress,
+            setGathering,
+            setGatherDone,
+            setFailedFiles,
+            setCleanupMessage,
+            setBusy,
+            setError,
+        ],
+    );
 
     async function handleRequireElevationChange(checked: boolean) {
         try {
-            await setRequireElevationAtLaunch(checked);
+            await persistRequireElevationAtLaunch(checked);
             setRequireElevationAtLaunch(checked);
         } catch (e) {
             setError(String(e));
