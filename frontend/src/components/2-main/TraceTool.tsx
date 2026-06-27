@@ -50,50 +50,54 @@ export function TraceTool() {
     const [cleanupMessage, setCleanupMessage] = useState<string | null>(null);
     const [busy, setBusy] = useState(false);
 
-    const loadSettings = useCallback(async () => {
-        try {
-            const [s, launch] = await Promise.all([getTraceSettings(), getAppLaunchSettings()]);
-            setSettings(s);
-            setIsTracing(s.isTracing);
-            setAccumulateTraces(s.accumulateTraces);
-            setEnableOtsTrace(s.enableOtsTrace);
-            setVerbosity(s.verbosity || 4);
-            setElevated(launch.isElevated);
-            setRequireElevationAtLaunch(launch.requireElevationAtLaunch);
-        } catch (e) {
-            setError(String(e));
-        }
-    }, []);
+    const loadSettings = useCallback(
+        async () => {
+            try {
+                const [s, launch] = await Promise.all([getTraceSettings(), getAppLaunchSettings()]);
+                setSettings(s);
+                setIsTracing(s.isTracing);
+                setAccumulateTraces(s.accumulateTraces);
+                setEnableOtsTrace(s.enableOtsTrace);
+                setVerbosity(s.verbosity || 4);
+                setElevated(launch.isElevated);
+                setRequireElevationAtLaunch(launch.requireElevationAtLaunch);
+            } catch (e) {
+                setError(String(e));
+            }
+        },
+        []);
 
-    useEffect(() => {
-        loadSettings();
+    useEffect(
+        () => {
+            loadSettings();
 
-        EventsOn('trace:state', (data: { isTracing: boolean }) => {
-            setIsTracing(data.isTracing);
-        });
-        EventsOn('trace:progress', (data: { collected: number; total: number }) => {
-            setProgress(data);
-        });
-        EventsOn('trace:gather-done', (data: GatherDoneEvent) => {
-            setGathering(false);
-            setGatherDone(true);
-            setFailedFiles(data.failedFiles ?? []);
-            setCleanupMessage(data.cleanupMessage ?? null);
-            setBusy(false);
-        });
-        EventsOn('trace:gather-error', (data: { message: string }) => {
-            setGathering(false);
-            setError(data.message);
-            setBusy(false);
-        });
+            EventsOn('trace:state', (data: { isTracing: boolean; }) => {
+                setIsTracing(data.isTracing);
+            });
+            EventsOn('trace:progress', (data: { collected: number; total: number; }) => {
+                setProgress(data);
+            });
+            EventsOn('trace:gather-done', (data: GatherDoneEvent) => {
+                setGathering(false);
+                setGatherDone(true);
+                setFailedFiles(data.failedFiles ?? []);
+                setCleanupMessage(data.cleanupMessage ?? null);
+                setBusy(false);
+            });
+            EventsOn('trace:gather-error', (data: { message: string; }) => {
+                setGathering(false);
+                setError(data.message);
+                setBusy(false);
+            });
 
-        return () => {
-            EventsOff('trace:state');
-            EventsOff('trace:progress');
-            EventsOff('trace:gather-done');
-            EventsOff('trace:gather-error');
-        };
-    }, [loadSettings]);
+            return () => {
+                EventsOff('trace:state');
+                EventsOff('trace:progress');
+                EventsOff('trace:gather-done');
+                EventsOff('trace:gather-error');
+            };
+        },
+        [loadSettings]);
 
     async function handleRequireElevationChange(checked: boolean) {
         try {
