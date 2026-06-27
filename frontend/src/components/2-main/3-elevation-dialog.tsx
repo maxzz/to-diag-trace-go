@@ -84,10 +84,12 @@ export function ElevationDialog() {
                 <h2 id="elevation-dialog-title" className="text-sm font-semibold text-blue-950">
                     Administrator privileges required
                 </h2>
+
                 <p className="text-xs leading-relaxed text-blue-900">
                     This operation requires administrator privileges. Relaunch the application elevated
                     to continue?
                 </p>
+                
                 <div className="flex justify-end gap-2">
                     <Button variant="outline" size="sm" onClick={cancelElevation}>
                         Cancel

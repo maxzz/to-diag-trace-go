@@ -32,7 +32,7 @@ import {
     showMoreAtom,
     verbosityAtom,
 } from './a-trace-tool-atoms';
-import { ElevationDialog } from './b-elevation-dialog';
+import { ElevationDialog } from './3-elevation-dialog';
 
 export function TraceTool() {
     const [settings, setSettings] = useAtom(settingsAtom);
