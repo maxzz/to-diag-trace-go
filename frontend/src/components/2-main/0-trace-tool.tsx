@@ -68,16 +68,7 @@ export function TraceTool() {
                 setError(String(e));
             }
         },
-        [
-            setSettings,
-            setIsTracing,
-            setAccumulateTraces,
-            setEnableOtsTrace,
-            setVerbosity,
-            setElevated,
-            setRequireElevationAtLaunch,
-            setError,
-        ]);
+        []);
 
     useEffect(
         () => {
@@ -109,17 +100,7 @@ export function TraceTool() {
                 EventsOff('trace:gather-error');
             };
         },
-        [
-            loadSettings,
-            setIsTracing,
-            setProgress,
-            setGathering,
-            setGatherDone,
-            setFailedFiles,
-            setCleanupMessage,
-            setBusy,
-            setError,
-        ]);
+        [loadSettings]);
 
     async function handleRequireElevationChange(checked: boolean) {
         try {
