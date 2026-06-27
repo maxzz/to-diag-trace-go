@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from 'react';
-import { useAtom, useSetAtom } from 'jotai';
+import { useAtom, useAtomValue, useSetAtom } from 'jotai';
 import { EventsOff, EventsOn } from '../../../wailsjs/runtime/runtime';
 import {
     cancelGather,
@@ -33,6 +33,32 @@ import {
     verbosityAtom,
 } from './a-trace-tool-atoms';
 import { ElevationDialog } from './3-elevation-dialog';
+
+function Introduction() {
+    const elevated = useAtomValue(elevatedAtom);
+
+    return (
+        <>
+            <p className="text-xs leading-relaxed">
+                The DigitalPersona Diagnostic Tool collects information while DigitalPersona software is running
+                and saves it in a zip file.
+            </p>
+            <p className="text-xs leading-relaxed text-blue-800/80">
+                This information is used for diagnostic purposes only. It does not contain passwords or
+                information in fields detected as protected.
+            </p>
+            <p className="text-xs leading-relaxed">
+                Start tracing, reproduce the problem, gather trace files and send the resulting archive to
+                technical support.
+            </p>
+            {!elevated && (
+                <p className="text-xs font-medium text-amber-700">
+                    Running without administrator privileges. Trace operations will prompt for elevation.
+                </p>
+            )}
+        </>
+    );
+}
 
 export function TraceTool() {
     const [settings, setSettings] = useAtom(settingsAtom);
@@ -170,18 +196,7 @@ export function TraceTool() {
 
     return (
         <div className="w-full max-w-md space-y-3 text-blue-950">
-            <p className="text-xs leading-relaxed">
-                The DigitalPersona Diagnostic Tool collects information while DigitalPersona software is running
-                and saves it in a zip file.
-            </p>
-            <p className="text-xs leading-relaxed text-blue-800/80">
-                This information is used for diagnostic purposes only. It does not contain passwords or
-                information in fields detected as protected.
-            </p>
-            <p className="text-xs leading-relaxed">
-                Start tracing, reproduce the problem, gather trace files and send the resulting archive to
-                technical support.
-            </p>
+            <Introduction />
 
             <label className="flex items-center gap-2 text-xs">
                 <input
@@ -192,12 +207,6 @@ export function TraceTool() {
                 />
                 Launch with administrator privileges next time
             </label>
-
-            {!elevated && (
-                <p className="text-xs font-medium text-amber-700">
-                    Running without administrator privileges. Trace operations will prompt for elevation.
-                </p>
-            )}
 
             <ElevationDialog />
 
