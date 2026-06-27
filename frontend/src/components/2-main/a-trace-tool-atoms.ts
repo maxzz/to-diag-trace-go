@@ -1,4 +1,5 @@
 import { atom } from 'jotai';
+import { setRequireElevationAtLaunch as persistRequireElevationAtLaunch } from '@/wails/trace-backend';
 
 export type TraceSettings = {
     isTracing: boolean;
@@ -35,7 +36,7 @@ export const enableOtsTraceAtom = atom(false);
 export const verbosityAtom = atom(4);
 
 export const elevatedAtom = atom(true);
-export const requireElevationAtLaunchAtom = atom(true);
+export const requireElevationAtLaunchBaseAtom = atom(true);
 export const elevationDialogOpenAtom = atom(false);
 export const pendingElevationActionAtom = atom<PendingElevationAction>(null);
 
@@ -46,5 +47,17 @@ export const gatherDoneAtom = atom(false);
 
 export const errorAtom = atom<string | null>(null);
 export const cleanupMessageAtom = atom<string | null>(null);
+
+export const requireElevationAtLaunchAtom = atom(
+    (get) => get(requireElevationAtLaunchBaseAtom),
+    async (_get, set, checked: boolean) => {
+        try {
+            await persistRequireElevationAtLaunch(checked);
+            set(requireElevationAtLaunchBaseAtom, checked);
+        } catch (e) {
+            set(errorAtom, String(e));
+        }
+    },
+);
 
 export const busyAtom = atom(false);

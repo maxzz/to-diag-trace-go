@@ -15,7 +15,7 @@ import {
     gatheringAtom,
     isTracingAtom,
     progressAtom,
-    requireElevationAtLaunchAtom,
+    requireElevationAtLaunchBaseAtom,
     settingsAtom,
     verbosityAtom,
 } from './a-trace-tool-atoms';

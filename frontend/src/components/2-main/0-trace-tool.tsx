@@ -3,7 +3,6 @@ import {
     cancelGather,
     isTracingActive,
     pickGatherDestination,
-    setRequireElevationAtLaunch as persistRequireElevationAtLaunch,
     startTracing,
     stopTracingAndGather,
 } from '@/wails/trace-backend';
@@ -50,15 +49,6 @@ export function TraceTool() {
     const [busy, setBusy] = useAtom(busyAtom);
 
     useSettingsInit();
-
-    async function handleRequireElevationChange(checked: boolean) {
-        try {
-            await persistRequireElevationAtLaunch(checked);
-            setRequireElevationAtLaunch(checked);
-        } catch (e) {
-            setError(String(e));
-        }
-    }
 
     async function runPrivilegedAction() {
         if (isTracing) {
@@ -126,7 +116,7 @@ export function TraceTool() {
                     type="checkbox"
                     checked={requireElevationAtLaunch}
                     disabled={busy}
-                    onChange={(e) => handleRequireElevationChange(e.target.checked)}
+                    onChange={(e) => setRequireElevationAtLaunch(e.target.checked)}
                 />
                 Launch with administrator privileges next time
             </label>
