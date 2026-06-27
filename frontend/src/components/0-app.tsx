@@ -1,7 +1,7 @@
 import { useEffect } from 'react';
 import { toggleDevTools } from '@/wails/trace-backend';
 import { ElevationStatusMarker } from './ElevationStatusMarker';
-import { TraceTool } from './TraceTool';
+import { TraceTool } from './2-main/TraceTool';
 
 export function App() {
 

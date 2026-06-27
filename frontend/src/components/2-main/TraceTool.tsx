@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from 'react';
-import { EventsOff, EventsOn } from '../../wailsjs/runtime/runtime';
+import { EventsOff, EventsOn } from '../../../wailsjs/runtime/runtime';
 import {
     cancelGather,
     getAppLaunchSettings,
