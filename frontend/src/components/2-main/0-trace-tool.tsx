@@ -34,89 +34,6 @@ import {
 } from './a-trace-tool-atoms';
 import { ElevationDialog } from './3-elevation-dialog';
 
-function Introduction() {
-    const elevated = useAtomValue(elevatedAtom);
-
-    return (
-        <>
-            <p className="text-xs leading-relaxed">
-                The DigitalPersona Diagnostic Tool collects information while DigitalPersona software is running
-                and saves it in a zip file.
-            </p>
-            <p className="text-xs leading-relaxed text-blue-800/80">
-                This information is used for diagnostic purposes only. It does not contain passwords or
-                information in fields detected as protected.
-            </p>
-            <p className="text-xs leading-relaxed">
-                Start tracing, reproduce the problem, gather trace files and send the resulting archive to
-                technical support.
-            </p>
-            {!elevated && (
-                <p className="text-xs font-medium text-amber-700">
-                    Running without administrator privileges. Trace operations will prompt for elevation.
-                </p>
-            )}
-        </>
-    );
-}
-
-function MoreSettings() {
-    const showMore = useAtomValue(showMoreAtom);
-    const [accumulateTraces, setAccumulateTraces] = useAtom(accumulateTracesAtom);
-    const [enableOtsTrace, setEnableOtsTrace] = useAtom(enableOtsTraceAtom);
-    const [verbosity, setVerbosity] = useAtom(verbosityAtom);
-    const settings = useAtomValue(settingsAtom);
-    const isTracing = useAtomValue(isTracingAtom);
-    const busy = useAtomValue(busyAtom);
-
-    if (!showMore) {
-        return null;
-    }
-
-    return (
-        <div className="space-y-2 rounded-md border border-blue-200 bg-blue-50/50 p-3 text-xs">
-            <label className="flex items-center gap-2">
-                <input
-                    type="checkbox"
-                    checked={accumulateTraces}
-                    disabled={isTracing || busy}
-                    onChange={(e) => setAccumulateTraces(e.target.checked)}
-                />
-                Accumulate traces between multiple runs of applications
-            </label>
-            <label className="flex items-center gap-2">
-                <input
-                    type="checkbox"
-                    checked={enableOtsTrace}
-                    disabled={!settings?.passwordManagerFound || isTracing || busy}
-                    onChange={(e) => setEnableOtsTrace(e.target.checked)}
-                />
-                Include Password Manager traces
-            </label>
-            <div className="flex items-center gap-2">
-                <span>Verbosity:</span>
-                <input
-                    type="number"
-                    min={1}
-                    max={9}
-                    className="w-14 rounded border border-blue-200 px-2 py-0.5"
-                    value={verbosity}
-                    disabled={isTracing || busy}
-                    onChange={(e) => setVerbosity(Number(e.target.value))}
-                />
-            </div>
-            <div>
-                <div className="mb-1">Folder where collected trace files are placed:</div>
-                <input
-                    readOnly
-                    className="w-full rounded border border-blue-200 bg-white px-2 py-1 text-[11px]"
-                    value={settings?.tracePath ?? ''}
-                />
-            </div>
-        </div>
-    );
-}
-
 export function TraceTool() {
     const [settings, setSettings] = useAtom(settingsAtom);
     const [isTracing, setIsTracing] = useAtom(isTracingAtom);
@@ -355,6 +272,89 @@ export function TraceTool() {
                     {isTracing ? 'Stop tracing and Gather trace files' : 'Start tracing'}
                 </Button>
             )}
+        </div>
+    );
+}
+
+function Introduction() {
+    const elevated = useAtomValue(elevatedAtom);
+
+    return (
+        <>
+            <p className="text-xs leading-relaxed">
+                The DigitalPersona Diagnostic Tool collects information while DigitalPersona software is running
+                and saves it in a zip file.
+            </p>
+            <p className="text-xs leading-relaxed text-blue-800/80">
+                This information is used for diagnostic purposes only. It does not contain passwords or
+                information in fields detected as protected.
+            </p>
+            <p className="text-xs leading-relaxed">
+                Start tracing, reproduce the problem, gather trace files and send the resulting archive to
+                technical support.
+            </p>
+            {!elevated && (
+                <p className="text-xs font-medium text-amber-700">
+                    Running without administrator privileges. Trace operations will prompt for elevation.
+                </p>
+            )}
+        </>
+    );
+}
+
+function MoreSettings() {
+    const showMore = useAtomValue(showMoreAtom);
+    const [accumulateTraces, setAccumulateTraces] = useAtom(accumulateTracesAtom);
+    const [enableOtsTrace, setEnableOtsTrace] = useAtom(enableOtsTraceAtom);
+    const [verbosity, setVerbosity] = useAtom(verbosityAtom);
+    const settings = useAtomValue(settingsAtom);
+    const isTracing = useAtomValue(isTracingAtom);
+    const busy = useAtomValue(busyAtom);
+
+    if (!showMore) {
+        return null;
+    }
+
+    return (
+        <div className="space-y-2 rounded-md border border-blue-200 bg-blue-50/50 p-3 text-xs">
+            <label className="flex items-center gap-2">
+                <input
+                    type="checkbox"
+                    checked={accumulateTraces}
+                    disabled={isTracing || busy}
+                    onChange={(e) => setAccumulateTraces(e.target.checked)}
+                />
+                Accumulate traces between multiple runs of applications
+            </label>
+            <label className="flex items-center gap-2">
+                <input
+                    type="checkbox"
+                    checked={enableOtsTrace}
+                    disabled={!settings?.passwordManagerFound || isTracing || busy}
+                    onChange={(e) => setEnableOtsTrace(e.target.checked)}
+                />
+                Include Password Manager traces
+            </label>
+            <div className="flex items-center gap-2">
+                <span>Verbosity:</span>
+                <input
+                    type="number"
+                    min={1}
+                    max={9}
+                    className="w-14 rounded border border-blue-200 px-2 py-0.5"
+                    value={verbosity}
+                    disabled={isTracing || busy}
+                    onChange={(e) => setVerbosity(Number(e.target.value))}
+                />
+            </div>
+            <div>
+                <div className="mb-1">Folder where collected trace files are placed:</div>
+                <input
+                    readOnly
+                    className="w-full rounded border border-blue-200 bg-white px-2 py-1 text-[11px]"
+                    value={settings?.tracePath ?? ''}
+                />
+            </div>
         </div>
     );
 }
