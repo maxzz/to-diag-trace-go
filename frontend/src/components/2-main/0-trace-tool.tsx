@@ -1,5 +1,5 @@
 import { useCallback, useEffect } from 'react';
-import { useAtom } from 'jotai';
+import { useAtom, useSetAtom } from 'jotai';
 import { EventsOff, EventsOn } from '../../../wailsjs/runtime/runtime';
 import {
     cancelGather,
@@ -7,7 +7,6 @@ import {
     getTraceSettings,
     isTracingActive,
     pickGatherDestination,
-    requestElevationForAction,
     setRequireElevationAtLaunch as persistRequireElevationAtLaunch,
     startTracing,
     stopTracingAndGather,
@@ -33,6 +32,7 @@ import {
     showMoreAtom,
     verbosityAtom,
 } from './a-trace-tool-atoms';
+import { ElevationDialog } from './b-elevation-dialog';
 
 export function TraceTool() {
     const [settings, setSettings] = useAtom(settingsAtom);
@@ -43,8 +43,8 @@ export function TraceTool() {
     const [verbosity, setVerbosity] = useAtom(verbosityAtom);
     const [elevated, setElevated] = useAtom(elevatedAtom);
     const [requireElevationAtLaunch, setRequireElevationAtLaunch] = useAtom(requireElevationAtLaunchAtom);
-    const [elevationDialogOpen, setElevationDialogOpen] = useAtom(elevationDialogOpenAtom);
-    const [pendingElevationAction, setPendingElevationAction] = useAtom(pendingElevationActionAtom);
+    const setElevationDialogOpen = useSetAtom(elevationDialogOpenAtom);
+    const setPendingElevationAction = useSetAtom(pendingElevationActionAtom);
     const [gathering, setGathering] = useAtom(gatheringAtom);
     const [progress, setProgress] = useAtom(progressAtom);
     const [failedFiles, setFailedFiles] = useAtom(failedFilesAtom);
@@ -183,44 +183,6 @@ export function TraceTool() {
         await runPrivilegedAction();
     }
 
-    async function confirmElevation() {
-        const action = pendingElevationAction;
-        setElevationDialogOpen(false);
-        setPendingElevationAction(null);
-        if (!action) {
-            return;
-        }
-
-        try {
-            if (action === 'startTracing') {
-                await requestElevationForAction({
-                    type: 'startTracing',
-                    startOpts: {
-                        accumulateTraces,
-                        enableOtsTrace: enableOtsTrace && (settings?.passwordManagerFound ?? false),
-                        verbosity,
-                    },
-                });
-            } else {
-                setBusy(true);
-                setGathering(true);
-                setGatherDone(false);
-                setFailedFiles([]);
-                setProgress({ collected: 0, total: 0 });
-                await requestElevationForAction({ type: 'gather' });
-            }
-        } catch (e) {
-            setError(String(e));
-            setGathering(false);
-            setBusy(false);
-        }
-    }
-
-    function cancelElevation() {
-        setElevationDialogOpen(false);
-        setPendingElevationAction(null);
-    }
-
     function handleCancelGather() {
         cancelGather();
         setGathering(false);
@@ -258,32 +220,7 @@ export function TraceTool() {
                 </p>
             )}
 
-            {elevationDialogOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-                    <div
-                        role="dialog"
-                        aria-modal="true"
-                        aria-labelledby="elevation-dialog-title"
-                        className="w-full max-w-sm space-y-4 rounded-md border border-blue-200 bg-white p-4 shadow-lg"
-                    >
-                        <h2 id="elevation-dialog-title" className="text-sm font-semibold text-blue-950">
-                            Administrator privileges required
-                        </h2>
-                        <p className="text-xs leading-relaxed text-blue-900">
-                            This operation requires administrator privileges. Relaunch the application elevated
-                            to continue?
-                        </p>
-                        <div className="flex justify-end gap-2">
-                            <Button variant="outline" size="sm" onClick={cancelElevation}>
-                                Cancel
-                            </Button>
-                            <Button size="sm" onClick={confirmElevation}>
-                                Elevate and continue
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <ElevationDialog />
 
             {showMore && (
                 <div className="space-y-2 rounded-md border border-blue-200 bg-blue-50/50 p-3 text-xs">
