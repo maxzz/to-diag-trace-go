@@ -1,3 +1,4 @@
+import "@/utils/util-hooks/x-devtool-install-block";
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { App } from './components/0-app';
