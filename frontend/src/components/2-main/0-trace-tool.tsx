@@ -77,8 +77,7 @@ export function TraceTool() {
             setElevated,
             setRequireElevationAtLaunch,
             setError,
-        ],
-    );
+        ]);
 
     useEffect(
         () => {
@@ -120,8 +119,7 @@ export function TraceTool() {
             setCleanupMessage,
             setBusy,
             setError,
-        ],
-    );
+        ]);
 
     async function handleRequireElevationChange(checked: boolean) {
         try {
