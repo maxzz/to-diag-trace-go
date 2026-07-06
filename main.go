@@ -79,12 +79,12 @@ func main() {
 	}
 
 	err = wails.Run(&options.App{
-		Title:  "DigitalPersona Diagnostic Tool",
-		Width:  initialWidth,
-		Height: initialHeight,
-		MinWidth:  380,
-		MinHeight: 400,
-		Assets:    assets,
+		Title:            "DigitalPersona Diagnostic Tool",
+		Width:            initialWidth,
+		Height:           initialHeight,
+		MinWidth:         380,
+		MinHeight:        400,
+		Assets:           assets,
 		BackgroundColour: &options.RGBA{R: 255, G: 255, B: 255, A: 1},
 		OnStartup:        app.Startup,
 		OnDomReady:       app.DomReady,

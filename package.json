@@ -3,17 +3,8 @@
   "version": "1.0.0",
   "description": "Go tool to collect diagnostic traces",
   "private": true,
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/maxzz/to-diag-trace-go.git"
-  },
-  "bugs": {
-    "url": "https://github.com/maxzz/to-diag-trace-go/issues"
-  },
-  "homepage": "https://github.com/maxzz/to-diag-trace-go#readme",
   "author": {
-    "name": "Max Zakharzhevskiy",
-    "email": "maxzz@msn.com"
+    "name": "Max Zakharzhevskiy"
   },
   "license": "MIT",
   "scripts": {
