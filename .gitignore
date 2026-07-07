@@ -28,8 +28,8 @@ Thumbs.db
 desktop.ini
 
 # Environment and Secrets
-.env
-.env.*
+#.env
+#.env.*
 !.env.example
 frontend/package.json.md5
 frontend/package.json.md5

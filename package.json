@@ -1,6 +1,6 @@
 {
   "name": "to-diag-trace-go-root",
-  "version": "1.0.0",
+  "version": "0.26.02",
   "description": "Go tool to collect diagnostic traces",
   "private": true,
   "author": {
