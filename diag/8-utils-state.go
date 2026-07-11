@@ -65,8 +65,7 @@ func (s *TraceState) quotedTracePaths() string {
 }
 
 func is64BitWindows() bool {
-	return os.Getenv("PROCESSOR_ARCHITECTURE") == "AMD64" ||
-		os.Getenv("PROCESSOR_ARCHITEW6432") == "AMD64"
+	return os.Getenv("PROCESSOR_ARCHITECTURE") == "AMD64" || os.Getenv("PROCESSOR_ARCHITEW6432") == "AMD64"
 }
 
 func quotedAppPath() (string, error) {
