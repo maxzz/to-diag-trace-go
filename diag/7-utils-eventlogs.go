@@ -25,15 +25,6 @@ func (g *Gatherer) exportEventLogs(failed *[]string) error {
 		label   string
 	}{
 		{
-			outPath: filepath.Join(folder, "DPLogs.evtx"),
-			label:   "DPLogs",
-			args: []string{
-				"epl",
-				"/q:" + dpEventLogQuery(dpFrom),
-				filepath.Join(folder, "DPLogs.evtx"),
-			},
-		},
-		{
 			outPath: filepath.Join(folder, "GroupPolicy.evtx"),
 			label:   "GroupPolicy",
 			args: []string{
@@ -55,6 +46,10 @@ func (g *Gatherer) exportEventLogs(failed *[]string) error {
 		},
 	}
 
+	if err := exportDpEventLog(filepath.Join(folder, "DPLogs.evtx"), dpEventLogQuery(dpFrom)); err != nil {
+		*failed = append(*failed, fmt.Sprintf("event log DPLogs: %v", err))
+	}
+
 	for _, item := range exports {
 		cmd := exec.Command("wevtutil", item.args...)
 		cmd.SysProcAttr = syscallSysProcAttrHideWindow()
@@ -69,6 +64,30 @@ func (g *Gatherer) deleteOldLogFiles(folder string) {
 	for _, name := range []string{"DPLogs.evtx", "System.evtx", "GroupPolicy.evtx"} {
 		_ = os.Remove(filepath.Join(folder, name))
 	}
+}
+
+func exportDpEventLog(outPath, query string) error {
+	queryFile, err := os.CreateTemp("", "dp-eventlog-query-*.xml")
+	if err != nil {
+		return err
+	}
+	queryPath := queryFile.Name()
+	defer os.Remove(queryPath)
+
+	if _, err := queryFile.WriteString(query); err != nil {
+		_ = queryFile.Close()
+		return err
+	}
+	if err := queryFile.Close(); err != nil {
+		return err
+	}
+
+	cmd := exec.Command("wevtutil", "epl", queryPath, outPath, "/sq:true", "/ow:true")
+	cmd.SysProcAttr = syscallSysProcAttrHideWindow()
+	if out, err := cmd.CombinedOutput(); err != nil {
+		return fmt.Errorf("%w (%s)", err, strings.TrimSpace(string(out)))
+	}
+	return nil
 }
 
 func dpEventLogQuery(from string) string {

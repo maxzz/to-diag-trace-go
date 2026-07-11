@@ -25,7 +25,7 @@ var (
 	modAdvapi32    = syscall.NewLazyDLL("advapi32.dll")
 	procStartTrace = modAdvapi32.NewProc("StartTraceW")
 	procControlTrace = modAdvapi32.NewProc("ControlTraceW")
-	procEnableTrace  = modAdvapi32.NewProc("EnableTraceEx2")
+	procEnableTrace  = modAdvapi32.NewProc("EnableTrace")
 )
 
 var (
@@ -49,7 +49,7 @@ type eventTraceProperties struct {
 	BuffersWritten      uint32
 	LogBuffersLost      uint32
 	RealTimeBuffersLost uint32
-	LoggerThreadId      uint32
+	LoggerThreadId      uintptr
 	LogFileNameOffset   uint32
 	LoggerNameOffset    uint32
 }
